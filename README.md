@@ -1,0 +1,2 @@
+# scraptt
+scraptt = Scrapy + PTT
