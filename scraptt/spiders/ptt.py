@@ -30,10 +30,10 @@ class PttSpider(scrapy.Spider):
         """Request handler."""
         for board in self.boards:
             url = f'https://www.ptt.cc/bbs/{board}/index.html'
-            yield scrapy.Request(url, self.parse)
+            yield scrapy.Request(url, self.parse_index)
 
-    def parse(self, response):
-        """Parse DOM."""
+    def parse_index(self, response):
+        """Parse index pages."""
         # exclude "置底文"
         item_css = '.r-ent .title a'
         if response.url.endswith('index.html'):
@@ -50,4 +50,4 @@ class PttSpider(scrapy.Spider):
                 return
             print('+ ', title, href, time)
         prev_url = response.dom('.btn.wide:contains("上頁")').attr('href')
-        yield scrapy.Request(prev_url, self.parse)
+        yield scrapy.Request(prev_url, self.parse_index)
