@@ -11,6 +11,7 @@ DOWNLOAD_DELAY = 0
 COOKIES_ENABLED = False
 TELNETCONSOLE_ENABLED = True
 LOG_LEVEL = 'INFO'
+LOG_FILE = '/tmp/scraptt.log'
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
