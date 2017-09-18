@@ -27,7 +27,8 @@ class PttSpider(scrapy.Spider):
 
     def parse(self, response):
         """Parse DOM."""
-        topics = response.dom('div.r-list-container div.r-ent div.title a')
+        # exclude "置底文"
+        topics = response.dom('.r-list-sep').prev_all('.r-ent .title a')
         for topic in topics.items():
             title = topic.text()
             href = topic.attr('href')
