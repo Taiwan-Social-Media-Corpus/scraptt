@@ -4,7 +4,8 @@ import scrapy
 
 
 class PostItem(scrapy.Item):
-    '''Item for "POST".'''
+    """Item for "POST"."""
+
     author = scrapy.Field()
     time = scrapy.Field()
     title = scrapy.Field()
