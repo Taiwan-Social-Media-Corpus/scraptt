@@ -10,6 +10,7 @@ CONCURRENT_REQUESTS = 16
 DOWNLOAD_DELAY = 0
 COOKIES_ENABLED = False
 TELNETCONSOLE_ENABLED = True
+LOG_LEVEL = 'INFO'
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
@@ -29,11 +30,9 @@ DOWNLOADER_MIDDLEWARES = {
 #     'scrapy.extensions.telnet.TelnetConsole': None,
 # }
 
-# Configure item pipelines
-# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#     'scraptt.pipelines.ScrapttPipeline': 300,
-# }
+ITEM_PIPELINES = {
+    'scraptt.pipelines.PTTPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
