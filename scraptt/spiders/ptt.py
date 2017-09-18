@@ -47,7 +47,7 @@ class PttSpider(scrapy.Spider):
         else:
             topics = response.dom(item_css)
         # reverse order to conform to timeline
-        for topic in reversed(list(topics.items())[:1]):
+        for topic in reversed(list(topics.items())):
             title = topic.text()
             href = topic.attr('href')
             timestamp = re.search(r'(\d{10})', href).group(1)
