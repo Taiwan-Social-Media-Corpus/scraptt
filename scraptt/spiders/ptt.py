@@ -9,6 +9,7 @@ import dateutil.parser as dp
 
 from .parsers.post import mod_content, extract_author
 from .parsers.comment import comment_counter, remove_ip
+from ..items import PostItem
 
 
 class PttSpider(scrapy.Spider):
@@ -46,7 +47,7 @@ class PttSpider(scrapy.Spider):
         else:
             topics = response.dom(item_css)
         # reverse order to conform to timeline
-        for topic in reversed(list(topics.items())):
+        for topic in reversed(list(topics.items())[:1]):
             title = topic.text()
             href = topic.attr('href')
             timestamp = re.search(r'(\d{10})', href).group(1)
@@ -84,6 +85,12 @@ class PttSpider(scrapy.Spider):
         post = dict()
         post['content'] = mod_content(content)
         post['url'] = response.url
+        post['id'] = (
+            response.url
+            .split('/')[-1]
+            .split('.html')[0]
+            .replace('.', '')
+        )
         meta_mod = dict()
         for k in meta.keys():
             if k in ref:
@@ -131,7 +138,7 @@ class PttSpider(scrapy.Spider):
             comment['time']['published'] = published.replace(year=year)
             latest_month = published.month
 
-        # quotes
+        # quote
         msg = post['content']
         qs = re.findall('※ 引述.*|\n: .*', msg)
         for q in qs:
@@ -146,11 +153,4 @@ class PttSpider(scrapy.Spider):
         post.update(
             {'count': comment_counter(post['comments'])}
         )
-        print('-------------')
-        import json
-        print(
-            json.dumps(
-                post, indent=4, ensure_ascii=False, default=lambda x: str(x)
-            )
-        )
-        print('-------------')
+        yield PostItem(**post)
