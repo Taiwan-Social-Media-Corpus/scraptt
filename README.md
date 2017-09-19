@@ -28,6 +28,11 @@ Create container and mount docker volume
 
     docker run -td -v $(pwd)/db/:/usr/local/var --name scraptt scraptt
 
+Create PostgresSQL container
+
+docker run -p 54321:5432 -e POSTGRES_PASSWORD=1234 -v $(pwd)/db:/var/lib/postgresql/data postgres:latest -d postgres
+
+
 Crawl
 
     docker exec -it scraptt /bin/sh -c 'scrapy crawl ptt -a boards=movie'
