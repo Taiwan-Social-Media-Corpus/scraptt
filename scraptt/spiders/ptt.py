@@ -19,7 +19,7 @@ class PttSpider(scrapy.Spider):
     allowed_domains = ['ptt.cc']
     custom_settings = {
         'ITEM_PIPELINES': {
-            'scraptt.pipelines.PTTPipeline': 300
+            'scraptt.postgres.pipelines.PTTPipeline': 300
         }
     }
 
