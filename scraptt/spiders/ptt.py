@@ -106,7 +106,7 @@ class PttSpider(scrapy.Spider):
         meta_mod = dict()
         for k in meta.keys():
             if k in ref:
-                meta_mod[ref[k]] = meta[k]
+                meta_mod[ref[k]] = meta[k].strip()
             else:
                 raise Exception(f'Unknown key: {k}')
         comments = []
