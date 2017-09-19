@@ -39,7 +39,9 @@ class PttSpider(scrapy.Spider):
         """Request handler."""
         for board in self.boards:
             url = f'https://www.ptt.cc/bbs/{board}/index.html'
-            yield scrapy.Request(url, self.parse_index)
+            yield scrapy.Request(
+                url, cookies={'over18': '1'}, callback=self.parse_index
+            )
 
     def parse_index(self, response):
         """Parse index pages."""
@@ -58,9 +60,13 @@ class PttSpider(scrapy.Spider):
             if time.date() < self.since:
                 return
             logger.debug(f'+ {title}, {href}, {time}')
-            yield scrapy.Request(href, self.parse_post)
+            yield scrapy.Request(
+                href, cookies={'over18': '1'}, callback=self.parse_post
+            )
         prev_url = response.dom('.btn.wide:contains("上頁")').attr('href')
-        yield scrapy.Request(prev_url, self.parse_index)
+        yield scrapy.Request(
+            prev_url, cookies={'over18': '1'}, callback=self.parse_index
+        )
 
     def parse_post(self, response):
         """Parse PTT post (PO文)."""
