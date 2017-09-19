@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Main crawler."""
 import re
-import logging
 from datetime import datetime
 from itertools import groupby
 
@@ -12,14 +11,17 @@ from .parsers.post import mod_content, extract_author
 from .parsers.comment import comment_counter, remove_ip
 from ..items import PostItem
 
-logger = logging.getLogger(__name__)
-
 
 class PttSpider(scrapy.Spider):
     """Crawler for PTT."""
 
     name = 'ptt'
     allowed_domains = ['ptt.cc']
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'scraptt.pipelines.PTTPipeline': 300
+        }
+    }
 
     def __init__(self, *args, **kwargs):
         """__init__ method.
@@ -59,7 +61,7 @@ class PttSpider(scrapy.Spider):
             time = datetime.fromtimestamp(int(timestamp))
             if time.date() < self.since:
                 return
-            logger.debug(f'+ {title}, {href}, {time}')
+            self.logger.debug(f'+ {title}, {href}, {time}')
             yield scrapy.Request(
                 href, cookies={'over18': '1'}, callback=self.parse_post
             )
@@ -71,7 +73,7 @@ class PttSpider(scrapy.Spider):
     def parse_post(self, response):
         """Parse PTT post (PO文)."""
         if response.status == 404:
-            logger.warning(f'404: {response.url}')
+            self.logger.warning(f'404: {response.url}')
             return None
         content = (
             response.dom('#main-content')
@@ -147,7 +149,7 @@ class PttSpider(scrapy.Spider):
             try:
                 published = dp.parse(remove_ip(comment['time']['published']))
             except ValueError:
-                logger.error(
+                self.logger.error(
                     f'''
                         unknown format: {comment['time']['published']}
                         (author: {comment['author']} | {post['url']})
