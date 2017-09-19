@@ -4,12 +4,18 @@
 BOT_NAME = 'scraptt'
 SPIDER_MODULES = ['scraptt.spiders']
 NEWSPIDER_MODULE = 'scraptt.spiders'
-# USER_AGENT = 'scraptt (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'  # noqa
 ROBOTSTXT_OBEY = False
 CONCURRENT_REQUESTS = 16
 DOWNLOAD_DELAY = 0
 COOKIES_ENABLED = False
 TELNETCONSOLE_ENABLED = True
+# cookies
+COOKIES_ENABLED = True
+COOKIES_DEBUG = False
+# logging
+LOG_LEVEL = 'INFO'
+LOG_FILE = '/tmp/scraptt.log'
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
@@ -29,11 +35,9 @@ DOWNLOADER_MIDDLEWARES = {
 #     'scrapy.extensions.telnet.TelnetConsole': None,
 # }
 
-# Configure item pipelines
-# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#     'scraptt.pipelines.ScrapttPipeline': 300,
-# }
+ITEM_PIPELINES = {
+    'scraptt.pipelines.PTTPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
