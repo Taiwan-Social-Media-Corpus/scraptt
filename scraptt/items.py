@@ -16,3 +16,9 @@ class PostItem(scrapy.Item):
     quote = scrapy.Field()
     comments = scrapy.Field()
     count = scrapy.Field()
+
+
+class MetaItem(scrapy.Item):
+    """Item for "META"."""
+
+    name = scrapy.Field()
