@@ -1,6 +1,6 @@
-.git
-.gitignore
-.gitmodules
+**/.git
+**/.gitignore
+**/.gitmodules
 Dockerfile
 .dockerignore
 **/__pycache__
