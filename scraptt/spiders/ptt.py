@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Main crawler."""
 import re
+import logging
 from datetime import datetime
 from itertools import groupby
 
@@ -10,6 +11,8 @@ import dateutil.parser as dp
 from .parsers.post import mod_content, extract_author
 from .parsers.comment import comment_counter, remove_ip
 from ..items import PostItem
+
+logger = logging.getLogger(__name__)
 
 
 class PttSpider(scrapy.Spider):
@@ -54,13 +57,16 @@ class PttSpider(scrapy.Spider):
             time = datetime.fromtimestamp(int(timestamp))
             if time.date() < self.since:
                 return
-            print('+ ', title, href, time)
+            logger.debug(f'+ {title}, {href}, {time}')
             yield scrapy.Request(href, self.parse_post)
         prev_url = response.dom('.btn.wide:contains("上頁")').attr('href')
         yield scrapy.Request(prev_url, self.parse_index)
 
     def parse_post(self, response):
         """Parse PTT post (PO文)."""
+        if response.status == 404:
+            logger.warning(f'404: {response.url}')
+            return None
         content = (
             response.dom('#main-content')
             .clone()
@@ -132,7 +138,16 @@ class PttSpider(scrapy.Spider):
         year = post['time']['published'].year
         latest_month = post['time']['published'].month
         for comment in comments:
-            published = dp.parse(remove_ip(comment['time']['published']))
+            try:
+                published = dp.parse(remove_ip(comment['time']['published']))
+            except ValueError:
+                logger.error(
+                    f'''
+                        unknown format: {comment['time']['published']}
+                        (author: {comment['author']} | {post['url']})
+                    '''
+                )
+                continue
             if published.month < latest_month:
                 year += 1
             comment['time']['published'] = published.replace(year=year)
