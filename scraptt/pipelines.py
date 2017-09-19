@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class PTTPipeline:
     """PTT pipeline."""
 
-    db_path = '/tmp/ptt.db'
+    db_path = '/usr/local/var/ptt.db'
 
     def open_spider(self, spider):
         """Build database connection."""
