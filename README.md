@@ -1,2 +1,33 @@
 # scraptt
-scraptt = Scrapy + PTT
+The most comprehensive PTT (踢踢踢) Crawler.  
+
+---
+
+## Requirements
+
++ python > 3.6.0
+
+## Installation
+
+    pip install -r requirements.txt
+
+## Usage
+
+    scrapy crawl ptt -a boards=movie
+    scrapy crawl ptt -a boards=movie,Gossiping
+
+---
+
+# Docker
+
+Create docker image
+
+    docker build . -t scraptt
+
+Create container and mount docker volume
+
+    docker run -td -v $(pwd)/db/:/usr/local/var --name scraptt scraptt
+
+Crawl
+
+    docker exec -it scraptt /bin/sh -c 'scrapy crawl ptt -a boards=movie'
