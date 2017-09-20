@@ -93,11 +93,12 @@ class PttSpider(scrapy.Spider):
             '作者': 'author',
             '時間': 'published',
             '標題': 'title',
-            '看板': 'board',
-            '站內': 'board'
         }
         post = dict()
         post['content'] = mod_content(content)
+        post['board'] = (
+            response.dom('#topbar a.board').remove('*').text().strip()
+        )
         post['url'] = response.url
         post['id'] = (
             response.url
@@ -109,8 +110,6 @@ class PttSpider(scrapy.Spider):
         for k in meta.keys():
             if k in ref:
                 meta_mod[ref[k]] = meta[k].strip()
-            else:
-                raise Exception(f'Unknown key: {k}')
         comments = []
         for _ in response.dom('.push').items():
             comment = {
@@ -122,7 +121,16 @@ class PttSpider(scrapy.Spider):
                     'crawled': datetime.now().replace(microsecond=0),
                 }
             }
-            comments.append(comment)
+            if comment['time']['published']:
+                comments.append(comment)
+            else:
+                self.logger.warning(
+                    (
+                        'Unknown comment published time detected!\n'
+                        f'url: {response.url}\n'
+                        f'author: {comment["author"]}'
+                    )
+                )
 
         post.update(meta_mod)
         post['author'] = extract_author(post['author'])
