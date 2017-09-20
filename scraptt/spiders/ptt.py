@@ -29,7 +29,14 @@ class PttSpider(scrapy.Spider):
         :param: boards: comma-separated board list
         :param: since: start crawling from this date (format: YYYYMMDD)
         """
-        self.boards = kwargs.pop('boards').strip().split(',')
+        boards = kwargs.pop('boards')
+        if boards == '_all':
+            from ..postgres.db import Session, Meta
+            session = Session()
+            self.boards = [i[0] for i in session.query(Meta.name)]
+            session.close()
+        else:
+            self.boards = boards.strip().split(',')
         since = kwargs.pop('since', None)
         self.since = (
             datetime.strptime(since, '%Y%m%d').date()
