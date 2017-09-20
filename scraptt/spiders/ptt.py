@@ -126,7 +126,12 @@ class PttSpider(scrapy.Spider):
                     'crawled': datetime.now().replace(microsecond=0),
                 }
             }
-            if comment['time']['published']:
+            time_cands = re.findall(
+                '\d{1,2}/\d{1,2}\s\d{1,2}:\d{1,2}',
+                comment['time']['published']
+            )
+            if time_cands:
+                comment['time']['published'] = time_cands[-1]
                 comments.append(comment)
             else:
                 self.logger.warning(
