@@ -99,12 +99,10 @@ class PttSpider(scrapy.Spider):
         post['board'] = (
             response.dom('#topbar a.board').remove('*').text().strip()
         )
-        post['url'] = response.url
         post['id'] = (
             response.url
             .split('/')[-1]
             .split('.html')[0]
-            .replace('.', '')
         )
         meta_mod = dict()
         for k in meta.keys():
@@ -160,7 +158,7 @@ class PttSpider(scrapy.Spider):
                 self.logger.error(
                     f'''
                         unknown format: {comment['time']['published']}
-                        (author: {comment['author']} | {post['url']})
+                        (author: {comment['author']} | {response.url} )
                     '''
                 )
                 continue
