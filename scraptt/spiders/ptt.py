@@ -17,6 +17,7 @@ class PttSpider(scrapy.Spider):
 
     name = 'ptt'
     allowed_domains = ['ptt.cc']
+    handle_httpstatus_list = [404]
     custom_settings = {
         'ITEM_PIPELINES': {
             'scraptt.postgres.pipelines.PTTPipeline': 300
@@ -37,6 +38,9 @@ class PttSpider(scrapy.Spider):
             session.close()
         else:
             self.boards = boards.strip().split(',')
+        if 'ALLPOST' in self.boards:
+            self.boards.remove('ALLPOST')
+            self.logger.warning('No support for crawling "ALLPOST"')
         since = kwargs.pop('since', None)
         self.since = (
             datetime.strptime(since, '%Y%m%d').date()
@@ -73,9 +77,10 @@ class PttSpider(scrapy.Spider):
                 href, cookies={'over18': '1'}, callback=self.parse_post
             )
         prev_url = response.dom('.btn.wide:contains("上頁")').attr('href')
-        yield scrapy.Request(
-            prev_url, cookies={'over18': '1'}, callback=self.parse_index
-        )
+        if prev_url:
+            yield scrapy.Request(
+                prev_url, cookies={'over18': '1'}, callback=self.parse_index
+            )
 
     def parse_post(self, response):
         """Parse PTT post (PO文)."""
@@ -143,7 +148,12 @@ class PttSpider(scrapy.Spider):
                 )
 
         post.update(meta_mod)
-        post['author'] = extract_author(post['author'])
+        if 'author' in post:
+            post['author'] = extract_author(post['author'])
+        else:
+            self.logger.warning(f'no author found: {response.url}')
+            return
+
         post['time'] = {
             'published': dp.parse(post.pop('published'))
         }
@@ -168,10 +178,10 @@ class PttSpider(scrapy.Spider):
                 published = dp.parse(remove_ip(comment['time']['published']))
             except ValueError:
                 self.logger.error(
-                    f'''
-                        unknown format: {comment['time']['published']}
-                        (author: {comment['author']} | {response.url} )
-                    '''
+                    (
+                        f"unknown format: {comment['time']['published']} "
+                        f"(author: {comment['author']} | {response.url} )"
+                    )
                 )
                 continue
             if published.month < latest_month:
