@@ -173,9 +173,12 @@ class PttSpider(scrapy.Spider):
         # add YEAR to comments
         year = post['time']['published'].year
         latest_month = post['time']['published'].month
+        current_year = datetime.now().year
+        _comments = []
         for comment in comments:
             try:
                 published = dp.parse(remove_ip(comment['time']['published']))
+                _comments.append(comment)
             except ValueError:
                 self.logger.error(
                     (
@@ -184,11 +187,14 @@ class PttSpider(scrapy.Spider):
                     )
                 )
                 continue
-            if published.month < latest_month:
+            if (
+                published.month < latest_month and
+                published.year < current_year
+            ):
                 year += 1
             comment['time']['published'] = published.replace(year=year)
             latest_month = published.month
-
+        post['comments'] = _comments
         # quote
         msg = post['content']
         qs = re.findall('※ 引述.*|\n: .*', msg)
