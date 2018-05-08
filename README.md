@@ -36,6 +36,10 @@ Create database and tables
 
     docker exec -it scraptt /bin/sh -c 'python -c "from scraptt.postgres.db import init_db; init_db()"'
 
+Crawl meta
+
+    docker exec -it scraptt /bin/sh -c 'scrapy crawl meta'
+    
 Crawl
 
     docker exec -it scraptt /bin/sh -c 'scrapy crawl ptt -a boards=movie'
