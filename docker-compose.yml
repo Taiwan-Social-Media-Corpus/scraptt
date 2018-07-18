@@ -1,0 +1,21 @@
+version: '3.1'
+
+services:
+  scraptt-db:
+    image: postgres:latest
+    ports:
+      - 54321:5432
+    volumes:
+      - ./mount/crawler/:/usr/local/var
+
+  scraptt:
+    build: .
+    environment:
+      - POSTGRES_PASSWORD=1234
+    volumes:
+      - ./mount/data:/var/lib/postgresql/data 
+    tty: true
+    depends_on:
+      - scraptt-db
+
+
