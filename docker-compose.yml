@@ -16,9 +16,20 @@ services:
     build: .
     volumes:
       - ./mount/crawler/:/usr/local/var
-    tty: true
+    command: sh -c 'scrapyd-deploy scraptt -p scraptt && tail -f /dev/null'
     depends_on:
       - scraptt-db
+      - scrapyd
+    networks:
+      - scraptt-network
+
+  scrapyd:
+    image: amigcamel/alpine-scrapy-psycopg2:latest # TODO: -- can be even smaller
+    volumes:
+      - ./scrapyd.cfg:/etc/scrapyd/scrapyd.conf
+    ports:
+      - 16800:6800
+    command: sh -c 'pip install scrapyd && scrapyd'
     networks:
       - scraptt-network
 

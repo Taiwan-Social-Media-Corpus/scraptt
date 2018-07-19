@@ -6,3 +6,4 @@ Dockerfile
 **/__pycache__
 README.md
 mount
+scrapyd.cfg
