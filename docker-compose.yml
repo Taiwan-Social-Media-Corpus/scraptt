@@ -2,20 +2,26 @@ version: '3.1'
 
 services:
   scraptt-db:
-    image: postgres:latest
+    image: cockroachdb/cockroach:v2.0.4 
     ports:
-      - 54321:5432
+      - 54321:26257
+      - 18080:8080
     volumes:
-      - ./mount/crawler/:/usr/local/var
+      - ./mount/data:/cockroach/cockroach-data
+    command: start --insecure
+    networks:
+      - scraptt-network
 
   scraptt:
     build: .
-    environment:
-      - POSTGRES_PASSWORD=1234
     volumes:
-      - ./mount/data:/var/lib/postgresql/data 
+      - ./mount/crawler/:/usr/local/var
     tty: true
     depends_on:
       - scraptt-db
+    networks:
+      - scraptt-network
 
+networks:
+  scraptt-network:
 
