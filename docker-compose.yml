@@ -6,14 +6,14 @@ services:
     ports:
       - 54321:5432
     volumes:
-      - ./mount/crawler/:/usr/local/var
+      - ./mount/data:/var/lib/postgresql/data 
 
   scraptt:
     build: .
     environment:
       - POSTGRES_PASSWORD=1234
     volumes:
-      - ./mount/data:/var/lib/postgresql/data 
+      - ./mount/crawler/:/usr/local/var
     tty: true
     depends_on:
       - scraptt-db
