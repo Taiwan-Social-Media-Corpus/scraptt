@@ -15,8 +15,13 @@ services:
   scraptt:
     build: .
     volumes:
-      - ./mount/crawler/:/usr/local/var
-    command: sh -c 'scrapyd-deploy scraptt -p scraptt && tail -f /dev/null'
+      - ./mount/scraptt/log:/var/log
+    command: >
+      sh -c '
+      for i in `seq 1 15`; do wget --spider -q scrapyd:6800 && break; sleep 1; done
+      && scrapyd-deploy scraptt -p scraptt
+      && tail -f /dev/null
+      '
     depends_on:
       - scraptt-db
       - scrapyd
@@ -29,7 +34,12 @@ services:
       - ./scrapyd.cfg:/etc/scrapyd/scrapyd.conf
     ports:
       - 16800:6800
-    command: sh -c 'pip install scrapyd && scrapyd'
+    command: >
+      sh -c '
+      pip install scrapyd
+      && pip install python-dateutil pyquery
+      && scrapyd
+      '
     networks:
       - scraptt-network
 
