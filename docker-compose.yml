@@ -8,7 +8,12 @@ services:
       - 18080:8080
     volumes:
       - ./mount/data:/cockroach/cockroach-data
-    command: start --insecure
+    command: >
+      shell -c '
+      echo "Asia/Taipei" > /etc/timezone
+      && rm /etc/localtime
+      && dpkg-reconfigure -f noninteractive tzdata
+      && /cockroach/cockroach start --insecure'
     networks:
       - scraptt-network
 
@@ -34,9 +39,12 @@ services:
       - ./scrapyd.cfg:/etc/scrapyd/scrapyd.conf
     ports:
       - 16800:6800
+    environment:
+      - "TZ=Asia/Taipei"
     command: >
       sh -c '
-      pip install scrapyd
+      apk add --update tzdata
+      && pip install scrapyd
       && pip install python-dateutil pyquery
       && scrapyd
       '
