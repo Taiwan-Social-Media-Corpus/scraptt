@@ -56,6 +56,8 @@ services:
     image: amigcamel/alpine-scrapy-psycopg2:latest # TODO: -- can be even smaller
     volumes:
       - ./scrapyd.cfg:/etc/scrapyd/scrapyd.conf
+      - ./requirements.txt:/tmp/requirements1.txt
+      - ./scraptt-pipeline/requirements.txt:/tmp/requirements2.txt
     ports:
       - 16800:6800
     environment:
@@ -64,7 +66,7 @@ services:
       sh -c '
       apk add --update tzdata
       && pip install scrapyd
-      && pip install python-dateutil pyquery
+      && pip install -r /tmp/requirements1.txt -r /tmp/requirements2.txt
       && scrapyd
       '
     networks:
