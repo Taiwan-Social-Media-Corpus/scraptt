@@ -12,6 +12,7 @@ class PostItem(scrapy.Item):
     time = scrapy.Field()
     title = scrapy.Field()
     content = scrapy.Field()
+    ip = scrapy.Field()
     quote = scrapy.Field()
     comments = scrapy.Field()
     count = scrapy.Field()

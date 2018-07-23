@@ -7,7 +7,7 @@ from itertools import groupby
 import scrapy
 import dateutil.parser as dp
 
-from .parsers.post import mod_content, extract_author
+from .parsers.post import mod_content, extract_author, extract_ip
 from .parsers.comment import comment_counter, remove_ip
 from ..items import PostItem
 
@@ -107,6 +107,7 @@ class PttSpider(scrapy.Spider):
             '標題': 'title',
         }
         post = dict()
+        post['ip'] = extract_ip(content)
         post['content'] = mod_content(content)
         post['board'] = (
             response.dom('#topbar a.board').remove('*').text().strip()
@@ -122,14 +123,16 @@ class PttSpider(scrapy.Spider):
                 meta_mod[ref[k]] = meta[k].strip()
         comments = []
         for _ in response.dom('.push').items():
+            published, ip = remove_ip(_('.push-ipdatetime').text())
             comment = {
                 'type': _('.push-tag').text(),
                 'author': extract_author(_('.push-userid').text()),
                 'content': _('.push-content').text().lstrip(' :'),
                 'time': {
-                    'published': _('.push-ipdatetime').text(),
+                    'published': published,
                     'crawled': datetime.now().replace(microsecond=0),
-                }
+                },
+                'ip': ip,
             }
             time_cands = re.findall(
                 '\d{1,2}/\d{1,2}\s\d{1,2}:\d{1,2}',
@@ -177,7 +180,7 @@ class PttSpider(scrapy.Spider):
         _comments = []
         for comment in comments:
             try:
-                published = dp.parse(remove_ip(comment['time']['published']))
+                published = dp.parse(comment['time']['published'])
                 _comments.append(comment)
             except ValueError:
                 self.logger.error(

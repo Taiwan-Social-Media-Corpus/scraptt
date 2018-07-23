@@ -14,4 +14,10 @@ def comment_counter(comments):
 
 def remove_ip(string):
     """Remove ip strings."""
-    return re.sub('\d+\.\d+\.\d+\.\d+', '', string)
+    ips = re.findall(r'\d{,3}\.\d{,3}\.\d{,3}\.\d{,3}', string)
+    if ips:
+        ip = ips[-1]
+        string = string.replace(ip, '')
+    else:
+        ip = None
+    return string, ip
