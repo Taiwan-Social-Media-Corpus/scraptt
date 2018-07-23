@@ -1,5 +1,5 @@
-# scraptt
-The most comprehensive PTT (踢踢踢) Crawler.  
+# Scraptt
+Distributed PTT (踢踢踢) Crawler
 
 ---
 
@@ -10,9 +10,14 @@ The most comprehensive PTT (踢踢踢) Crawler.
 ## Installation
 
     pip install -r requirements.txt
+    pip install -r scraptt-pipeline/requirements.txt
 
 ## Usage
 
+Retrieve all board names (obligatory)
+    scrapy crawl meta
+
+Retrieve data from certain boards:
     scrapy crawl ptt -a boards=movie
     scrapy crawl ptt -a boards=movie,Gossiping
 
@@ -24,22 +29,21 @@ Create docker image
 
     docker build . -t scraptt
 
-Create PostgresSQL container
+Create a stack
 
-    docker run -d --name scraptt-db -p 54321:5432 -e POSTGRES_PASSWORD=1234 -v /usr/local/var/scraptt/data:/var/lib/postgresql/data postgres:latest
+    docker stack deploy -c docker-stack.yml scraptt
 
-Create container and mount docker volume
+CockroachDB monitor page:
 
-    docker run -td -v $(pwd)/db/:/usr/local/var --name scraptt --link scraptt-db:scraptt-link scraptt
+http://localhost:18080
 
-Create database and tables
+Scrapyd monitor page:
 
-    docker exec -it scraptt /bin/sh -c 'python -c "from scraptt.postgres.db import init_db; init_db()"'
+http://localhost:16800
 
-Crawl meta
+Remove stack:
 
-    docker exec -it scraptt /bin/sh -c 'scrapy crawl meta'
-    
-Crawl
-
-    docker exec -it scraptt /bin/sh -c 'scrapy crawl ptt -a boards=movie'
+    docker stack rm scraptt
+    docker network rm scraptt-network
+    docker volume rm scraptt-db
+    docker volume rm scraptt
