@@ -12,12 +12,19 @@ services:
       && rm /etc/localtime
       && dpkg-reconfigure -f noninteractive tzdata
       && /cockroach/cockroach start --insecure'
+    volumes:
+      - scraptt-db:/cockroach/cockroach-data
     networks:
       - scraptt-network
 
   scraptt-db-N:
     image: cockroachdb/cockroach:v2.0.4
-    command: start --insecure --join=scraptt-db
+    command: >
+      shell -c '
+      echo "Asia/Taipei" > /etc/timezone
+      && rm /etc/localtime
+      && dpkg-reconfigure -f noninteractive tzdata
+      && /cockroach/cockroach start --insecure --join=scraptt-db'
     depends_on:
       - scraptt-db
     deploy:
@@ -31,7 +38,7 @@ services:
   scraptt:
     image: scraptt
     volumes:
-      - ./mount/scraptt/log:/var/log
+      - scraptt:/var/log
     command: >
       sh -c '
       for i in `seq 1 15`; do wget --spider -q scrapyd:6800 && break; sleep 1; done
@@ -62,6 +69,9 @@ services:
     networks:
       - scraptt-network
 
+volumes:
+  scraptt:
+  scraptt-db:
+
 networks:
   scraptt-network:
-
