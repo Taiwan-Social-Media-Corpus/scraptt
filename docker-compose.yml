@@ -15,27 +15,16 @@ services:
     networks:
       - scraptt-network
 
-  scraptt-db-1:
+  scraptt-db-N:
     image: cockroachdb/cockroach:v2.0.4
     command: start --insecure --join=scraptt-db
     depends_on:
       - scraptt-db
-    networks:
-      - scraptt-network
-
-  scraptt-db-2:
-    image: cockroachdb/cockroach:v2.0.4
-    command: start --insecure --join=scraptt-db
-    depends_on:
-      - scraptt-db
-    networks:
-      - scraptt-network
-
-  scraptt-db-3:
-    image: cockroachdb/cockroach:v2.0.4
-    command: start --insecure --join=scraptt-db
-    depends_on:
-      - scraptt-db
+    deploy:
+      replicas: 3
+      placement:
+        constraints:
+          - node.role == manager
     networks:
       - scraptt-network
 
