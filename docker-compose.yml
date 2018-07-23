@@ -6,8 +6,6 @@ services:
     ports:
       - 54321:26257
       - 18080:8080
-    volumes:
-      - ./mount/data:/cockroach/cockroach-data
     command: >
       shell -c '
       echo "Asia/Taipei" > /etc/timezone
@@ -17,8 +15,32 @@ services:
     networks:
       - scraptt-network
 
+  scraptt-db-1:
+    image: cockroachdb/cockroach:v2.0.4
+    command: start --insecure --join=scraptt-db
+    depends_on:
+      - scraptt-db
+    networks:
+      - scraptt-network
+
+  scraptt-db-2:
+    image: cockroachdb/cockroach:v2.0.4
+    command: start --insecure --join=scraptt-db
+    depends_on:
+      - scraptt-db
+    networks:
+      - scraptt-network
+
+  scraptt-db-3:
+    image: cockroachdb/cockroach:v2.0.4
+    command: start --insecure --join=scraptt-db
+    depends_on:
+      - scraptt-db
+    networks:
+      - scraptt-network
+
   scraptt:
-    build: .
+    image: scraptt
     volumes:
       - ./mount/scraptt/log:/var/log
     command: >
