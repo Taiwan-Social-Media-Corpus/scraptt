@@ -47,3 +47,4 @@ Remove stack:
     docker network rm scraptt-network
     docker volume rm scraptt-db
     docker volume rm scraptt
+    docker rm `docker ps -a | grep scraptt | awk '{print $1}'`
