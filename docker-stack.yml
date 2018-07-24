@@ -29,9 +29,6 @@ services:
       - scraptt-db
     deploy:
       replicas: 3
-      placement:
-        constraints:
-          - node.role == manager
     networks:
       - scraptt-network
 
