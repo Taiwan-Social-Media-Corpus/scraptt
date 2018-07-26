@@ -1,4 +1,0 @@
-[submodule "scraptt-pipeline"]
-	path = scraptt-pipeline
-	url = https://github.com/PTT-Corpus/scraptt-pipeline
-	branch = cockroachdb 
