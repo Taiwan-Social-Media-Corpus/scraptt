@@ -40,7 +40,7 @@ services:
       sh -c '
       for i in `seq 1 15`; do wget --spider -q scrapyd:6800 && break; sleep 1; done
       && scrapyd-deploy scraptt -p scraptt
-      && python -c "from scraptt.postgres.db import init_db; init_db()"
+      && python -c "from cockroach.db import init_db; init_db()"
       && tail -f /dev/null
       '
     depends_on:
@@ -53,17 +53,16 @@ services:
     image: amigcamel/alpine-scrapy-psycopg2:latest # TODO: -- can be even smaller
     volumes:
       - ./scrapyd.cfg:/etc/scrapyd/scrapyd.conf
-      - ./requirements.txt:/tmp/requirements1.txt
-      - ./scraptt-pipeline/requirements.txt:/tmp/requirements2.txt
+      - ./requirements.txt:/tmp/requirements.txt
     ports:
       - 16800:6800
     environment:
       - "TZ=Asia/Taipei"
     command: >
       sh -c '
-      apk add --update tzdata
+      apk add --update tzdata git
       && pip install scrapyd
-      && pip install -r /tmp/requirements1.txt -r /tmp/requirements2.txt
+      && pip install -r /tmp/requirements.txt
       && scrapyd
       '
     networks:

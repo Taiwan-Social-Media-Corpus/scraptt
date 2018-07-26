@@ -32,7 +32,7 @@ class PttSpider(scrapy.Spider):
         """
         boards = kwargs.pop('boards')
         if boards == '_all':
-            from ..postgres.db import Session, Meta
+            from cockroach.db import Session, Meta
             session = Session()
             self.boards = [i[0] for i in session.query(Meta.name)]
             session.close()
