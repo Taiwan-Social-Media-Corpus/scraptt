@@ -54,23 +54,23 @@ class PTTPipeline:
         """Insert data into database."""
         self.cursor.execute(f'''
             INSERT OR IGNORE INTO post
-            (id, board, author, publisehd, crawled, title, url, content)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (id, board, author, publisehd, crawled, title, url, content, ip)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
                 item['id'], item['board'], item['author'],
                 item['time']['published'], item['time']['published'],
-                item['title'], item['url'], item['content']
+                item['title'], item['url'], item['content'], item['ip'],
             )
         )
         for comment in item['comments']:
             self.cursor.execute(f'''
                 INSERT OR IGNORE INTO comment
-                (post_id, type, author, publisehd, crawled, content)
-                VALUES (?, ?, ?, ?, ?, ?)
+                (post_id, type, author, publisehd, crawled, content, ip)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (
                 item['id'], comment['type'], comment['author'],
                 comment['time']['published'], comment['time']['published'],
-                comment['content']
+                comment['content'], comment['ip'],
                 )
             )
         self.connection.commit()

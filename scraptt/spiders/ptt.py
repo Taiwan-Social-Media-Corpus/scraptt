@@ -7,7 +7,7 @@ from itertools import groupby
 import scrapy
 import dateutil.parser as dp
 
-from .parsers.post import mod_content, extract_author
+from .parsers.post import mod_content, extract_author, extract_ip
 from .parsers.comment import comment_counter, remove_ip
 from ..items import PostItem
 
@@ -17,9 +17,10 @@ class PttSpider(scrapy.Spider):
 
     name = 'ptt'
     allowed_domains = ['ptt.cc']
+    handle_httpstatus_list = [404]
     custom_settings = {
         'ITEM_PIPELINES': {
-            'scraptt.pipelines.PTTPipeline': 300
+            'scraptt.postgres.pipelines.PTTPipeline': 300
         }
     }
 
@@ -29,7 +30,17 @@ class PttSpider(scrapy.Spider):
         :param: boards: comma-separated board list
         :param: since: start crawling from this date (format: YYYYMMDD)
         """
-        self.boards = kwargs.pop('boards').strip().split(',')
+        boards = kwargs.pop('boards')
+        if boards == '_all':
+            from cockroach.db import Session, Meta
+            session = Session()
+            self.boards = [i[0] for i in session.query(Meta.name)]
+            session.close()
+        else:
+            self.boards = boards.strip().split(',')
+        if 'ALLPOST' in self.boards:
+            self.boards.remove('ALLPOST')
+            self.logger.warning('No support for crawling "ALLPOST"')
         since = kwargs.pop('since', None)
         self.since = (
             datetime.strptime(since, '%Y%m%d').date()
@@ -66,9 +77,10 @@ class PttSpider(scrapy.Spider):
                 href, cookies={'over18': '1'}, callback=self.parse_post
             )
         prev_url = response.dom('.btn.wide:contains("上頁")').attr('href')
-        yield scrapy.Request(
-            prev_url, cookies={'over18': '1'}, callback=self.parse_index
-        )
+        if prev_url:
+            yield scrapy.Request(
+                prev_url, cookies={'over18': '1'}, callback=self.parse_index
+            )
 
     def parse_post(self, response):
         """Parse PTT post (PO文)."""
@@ -93,39 +105,58 @@ class PttSpider(scrapy.Spider):
             '作者': 'author',
             '時間': 'published',
             '標題': 'title',
-            '看板': 'board',
-            '站內': 'board'
         }
         post = dict()
+        post['ip'] = extract_ip(content)
         post['content'] = mod_content(content)
-        post['url'] = response.url
+        post['board'] = (
+            response.dom('#topbar a.board').remove('*').text().strip()
+        )
         post['id'] = (
             response.url
             .split('/')[-1]
             .split('.html')[0]
-            .replace('.', '')
         )
         meta_mod = dict()
         for k in meta.keys():
             if k in ref:
                 meta_mod[ref[k]] = meta[k].strip()
-            else:
-                raise Exception(f'Unknown key: {k}')
         comments = []
         for _ in response.dom('.push').items():
+            published, ip = remove_ip(_('.push-ipdatetime').text())
             comment = {
                 'type': _('.push-tag').text(),
                 'author': extract_author(_('.push-userid').text()),
                 'content': _('.push-content').text().lstrip(' :'),
                 'time': {
-                    'published': _('.push-ipdatetime').text(),
+                    'published': published,
                     'crawled': datetime.now().replace(microsecond=0),
-                }
+                },
+                'ip': ip,
             }
-            comments.append(comment)
+            time_cands = re.findall(
+                '\d{1,2}/\d{1,2}\s\d{1,2}:\d{1,2}',
+                comment['time']['published']
+            )
+            if time_cands:
+                comment['time']['published'] = time_cands[-1]
+                comments.append(comment)
+            else:
+                self.logger.warning(
+                    (
+                        'Unknown comment published time detected!\n'
+                        f'url: {response.url}\n'
+                        f'author: {comment["author"]}'
+                    )
+                )
 
         post.update(meta_mod)
-        post['author'] = extract_author(post['author'])
+        if 'author' in post:
+            post['author'] = extract_author(post['author'])
+        else:
+            self.logger.warning(f'no author found: {response.url}')
+            return
+
         post['time'] = {
             'published': dp.parse(post.pop('published'))
         }
@@ -145,22 +176,28 @@ class PttSpider(scrapy.Spider):
         # add YEAR to comments
         year = post['time']['published'].year
         latest_month = post['time']['published'].month
+        current_year = datetime.now().year
+        _comments = []
         for comment in comments:
             try:
-                published = dp.parse(remove_ip(comment['time']['published']))
+                published = dp.parse(comment['time']['published'])
+                _comments.append(comment)
             except ValueError:
                 self.logger.error(
-                    f'''
-                        unknown format: {comment['time']['published']}
-                        (author: {comment['author']} | {post['url']})
-                    '''
+                    (
+                        f"unknown format: {comment['time']['published']} "
+                        f"(author: {comment['author']} | {response.url} )"
+                    )
                 )
                 continue
-            if published.month < latest_month:
+            if (
+                published.month < latest_month and
+                published.year < current_year
+            ):
                 year += 1
             comment['time']['published'] = published.replace(year=year)
             latest_month = published.month
-
+        post['comments'] = _comments
         # quote
         msg = post['content']
         qs = re.findall('※ 引述.*|\n: .*', msg)

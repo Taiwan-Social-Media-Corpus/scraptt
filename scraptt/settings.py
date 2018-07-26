@@ -15,7 +15,7 @@ COOKIES_ENABLED = True
 COOKIES_DEBUG = False
 # logging
 LOG_LEVEL = 'INFO'
-LOG_FILE = '/usr/local/var/scraptt.log'
+LOG_FILE = '/var/log/scraptt.log'
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html

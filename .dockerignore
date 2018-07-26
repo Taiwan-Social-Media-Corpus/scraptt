@@ -1,7 +1,9 @@
-.git
-.gitignore
-.gitmodules
+**/.git
+**/.gitignore
+**/.gitmodules
 Dockerfile
 .dockerignore
 **/__pycache__
 README.md
+mount
+scrapyd.cfg

@@ -41,3 +41,17 @@ def mod_content(content):
 def extract_author(string):
     """Extract author id."""
     return string.split(' ')[0]
+
+
+def extract_ip(string):
+    """Extract IP address.
+
+    The strategy is to find as many IPs as possible, and return the last one
+    as the IP info is usually at the bottom of the content.
+    """
+    ips = re.findall(r'\d{,3}\.\d{,3}\.\d{,3}\.\d{,3}', string)
+    if ips:
+        ip = ips[-1]
+    else:
+        ip = None
+    return ip

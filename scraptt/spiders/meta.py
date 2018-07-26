@@ -14,7 +14,7 @@ class MetaSpider(scrapy.Spider):
     start_urls = ['https://www.ptt.cc/cls/1']
     custom_settings = {
         'ITEM_PIPELINES': {
-            'scraptt.pipelines.MetaPipeline': 300
+            'scraptt.postgres.pipelines.MetaPipeline': 300
         }
     }
 
@@ -25,6 +25,10 @@ class MetaSpider(scrapy.Spider):
             flag = '/index.html'
             if href.endswith(flag):
                 board_name = href.replace(flag, '').split('/')[-1]
+                if board_name == 'ALLPOST':
+                    # "ALLPOST" always return 404, so it's pointless to
+                    # crawl this board.
+                    return
                 yield MetaItem(name=board_name)
             else:
                 yield scrapy.Request(href, self.parse)
