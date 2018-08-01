@@ -20,7 +20,8 @@ class PttSpider(scrapy.Spider):
     handle_httpstatus_list = [404]
     custom_settings = {
         'ITEM_PIPELINES': {
-            'scraptt.postgres.pipelines.PTTPipeline': 300
+            'cockroach.pipelines.PTTPipeline': 300,
+            'cockroach.pipelines.ElasticsearchPipeline': 400,
         }
     }
 
