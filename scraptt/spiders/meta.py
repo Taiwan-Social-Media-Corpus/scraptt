@@ -14,7 +14,7 @@ class MetaSpider(scrapy.Spider):
     start_urls = ['https://www.ptt.cc/cls/1']
     custom_settings = {
         'ITEM_PIPELINES': {
-            'scraptt.postgres.pipelines.MetaPipeline': 300
+            'cockroach.pipelines.MetaPipeline': 300
         }
     }
 
