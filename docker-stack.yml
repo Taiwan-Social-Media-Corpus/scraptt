@@ -50,19 +50,14 @@ services:
       - scraptt-network
 
   scrapyd:
-    image: amigcamel/alpine-scrapy-psycopg2:latest # TODO: -- can be even smaller
+    image: scraptt 
     volumes:
       - ./scrapyd.cfg:/etc/scrapyd/scrapyd.conf
-      - ./requirements.txt:/tmp/requirements.txt
     ports:
       - 16800:6800
-    environment:
-      - "TZ=Asia/Taipei"
     command: >
       sh -c '
-      apk add --update tzdata git
-      && pip install scrapyd
-      && pip install -r /tmp/requirements.txt
+      pip install scrapyd
       && scrapyd
       '
     networks:
