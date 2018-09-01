@@ -163,3 +163,4 @@ tags
 
 mount/*
 !mount/.keep
+.envrc
