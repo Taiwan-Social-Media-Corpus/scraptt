@@ -5,3 +5,4 @@ python-dateutil==2.6.1
 git+https://github.com/PTT-Corpus/scraptt-pipeline@es
 fake-useragent==0.1.10
 scrapy-fake-useragent==1.1.0
+scrapyd==1.2.0
