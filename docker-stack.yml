@@ -51,8 +51,6 @@ services:
 
   scrapyd:
     image: scraptt 
-    volumes:
-      - ./scrapyd.cfg:/etc/scrapyd/scrapyd.conf
     ports:
       - 16800:6800
     command: >
